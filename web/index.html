@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Таверна «Пьяный Мушкетъ» — Лѣто 1584</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=MedievalSharp&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --parchment-bg: #E4D3B8;
+      --parchment-dark: #D4BF9E;
+      --parchment-edge: #3E2718;
+      --ink-black: #1A110B;
+      --wax-red: #8B1E1E;
+      --wax-gold: #C89B3C;
+      --tavern-wood: #2B1810;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      cursor: crosshair; /* Fallback before custom quill */
+    }
+
+    body {
+      background: #120A06 url('https://images.unsplash.com/photo-1546484475-7f7bd55792da?auto=format&fit=crop&w=1600&q=80') center/cover fixed;
+      color: var(--ink-black);
+      font-family: 'Cormorant Garamond', serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Custom Feather Quill Cursor */
+    #quillCursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 36px;
+      height: 36px;
+      pointer-events: none;
+      z-index: 99999;
+      transform: translate(-4px, -32px) rotate(-15deg);
+      transition: transform 0.05s ease-out;
+    }
+
+    /* Ink droplet particles */
+    .ink-particle {
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      background: #140d08;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 99998;
+      opacity: 0.85;
+      animation: inkFade 1.2s forwards;
+    }
+
+    @keyframes inkFade {
+      0% { transform: scale(1) translate(0, 0); opacity: 0.9; }
+      100% { transform: scale(2.2) translate(var(--dx), var(--dy)); opacity: 0; }
+    }
+
+    /* Parchment Container with Burnt Edges */
+    .parchment-sheet {
+      background: var(--parchment-bg);
+      background-image: 
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.15), transparent 70%),
+        linear-gradient(135deg, #dfceb0 0%, #e8dcbe 50%, #d8c39e 100%);
+      border: 12px solid var(--parchment-edge);
+      border-image: linear-gradient(to bottom right, #3E2718, #5a3922, #21130a) 12;
+      box-shadow: 
+        0 0 0 4px #26170d,
+        0 15px 40px rgba(0, 0, 0, 0.85),
+        inset 0 0 80px rgba(62, 39, 24, 0.45);
+      position: relative;
+    }
+
+    header {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tavern-title {
+      font-family: 'MedievalSharp', cursive;
+      font-size: 2.8rem;
+      color: #38190B;
+      text-shadow: 1px 1px 2px #fff3d6, 0 0 10px rgba(200, 155, 60, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .audio-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(62, 39, 24, 0.15);
+      padding: 10px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--parchment-edge);
+    }
+
+    .medieval-btn {
+      font-family: 'MedievalSharp', cursive;
+      font-size: 1.1rem;
+      background: linear-gradient(180deg, #5c1818, #3b0e0e);
+      color: #ffe6a7;
+      border: 2px solid #c89b3c;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 3px 3px 8px rgba(0,0,0,0.5), inset 1px 1px 2px #ff8c8c;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .medieval-btn:hover {
+      background: linear-gradient(180deg, #7a2222, #4d1313);
+      color: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 4px 6px 14px rgba(0,0,0,0.6);
+    }
+
+    /* Main Container */
+    .tavern-hall {
+      max-width: 1200px;
+      margin: 0 auto 50px;
+      padding: 0 16px;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 30px;
+    }
+
+    /* 3D Menu Folio / Book */
+    .menu-folio {
+      padding: 40px;
+      min-height: 600px;
+    }
+
+    .gothic-header {
+      font-family: 'UnifrakturCook', cursive;
+      font-size: 3.2rem;
+      text-align: center;
+      color: var(--wax-red);
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+      line-height: 1;
+    }
+
+    .sub-subheading {
+      text-align: center;
+      font-style: italic;
+      font-size: 1.25rem;
+      color: #4A3323;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #5a3922;
+      padding-bottom: 16px;
+    }
+
+    .menu-item {
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px dashed rgba(62, 39, 24, 0.4);
+      padding-bottom: 12px;
+    }
+
+    .item-title {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: #21130a;
+    }
+
+    .item-desc {
+      font-size: 1.05rem;
+      color: #4f3b2e;
+      font-style: italic;
+      margin-top: 4px;
+      max-width: 520px;
+    }
+
+    .item-price {
+      text-align: right;
+      font-family: 'MedievalSharp', cursive;
+      font-size: 1.25rem;
+      color: var(--wax-red);
+      cursor: help;
+      position: relative;
+    }
+
+    .item-rub-hint {
+      font-size: 0.85rem;
+      color: #694f3d;
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    /* Royal Bounty Notice Board */
+    .bounty-board {
+      background: #2E1B11;
+      border: 8px solid #1A0D07;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.8);
+      padding: 24px;
+      border-radius: 8px;
+      color: #F0E2C8;
+    }
+
+    .bounty-board h3 {
+      font-family: 'MedievalSharp', cursive;
+      font-size: 1.8rem;
+      color: #E2B96F;
+      text-align: center;
+      margin-bottom: 18px;
+      border-bottom: 2px solid #593522;
+      padding-bottom: 10px;
+    }
+
+    .bounty-leaf {
+      background: #E8D9BD;
+      color: #1A0D07;
+      padding: 18px;
+      margin-bottom: 18px;
+      border-radius: 4px;
+      box-shadow: 4px 4px 10px rgba(0,0,0,0.4);
+      border-left: 4px solid var(--wax-red);
+      position: relative;
+      transform: rotate(-1deg);
+      transition: transform 0.2s ease;
+    }
+
+    .bounty-leaf:nth-child(even) {
+      transform: rotate(1.5deg);
+    }
+
+    .bounty-leaf:hover {
+      transform: scale(1.03) rotate(0deg);
+    }
+
+    .pin-wax {
+      position: absolute;
+      top: -8px;
+      right: 14px;
+      width: 22px;
+      height: 22px;
+      background: var(--wax-red);
+      border-radius: 50%;
+      border: 2px solid #541111;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    /* Reservation Modal with Wax Seal Diploma */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 5, 2, 0.85);
+      backdrop-filter: blur(5px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 20px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .reserve-card {
+      max-width: 650px;
+      width: 100%;
+      padding: 36px;
+    }
+
+    .form-row {
+      margin-bottom: 16px;
+    }
+
+    .form-row label {
+      display: block;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: #2b170c;
+      margin-bottom: 6px;
+    }
+
+    .medieval-input {
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 1.1rem;
+      font-family: 'Cormorant Garamond', serif;
+      background: rgba(255, 255, 255, 0.7);
+      border: 2px solid #5A3922;
+      border-radius: 4px;
+      outline: none;
+      color: #1E0F07;
+    }
+
+    .medieval-input:focus {
+      background: #ffffff;
+      border-color: var(--wax-red);
+    }
+
+    @media (max-width: 850px) {
+      .tavern-hall { grid-template-columns: 1fr; }
+      .tavern-title { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Feather Quill Cursor Asset -->
+  <svg id="quillCursor" viewBox="0 0 64 64">
+    <!-- Stylized Goose Feather -->
+    <path d="M56 4 C40 6 22 22 16 38 C14 44 12 52 8 60 C12 56 18 52 24 50 C40 44 56 26 58 10 Z" fill="#E8D5B5" stroke="#3E2718" stroke-width="2"/>
+    <path d="M58 8 L10 58" stroke="#3E2718" stroke-width="2"/>
+    <path d="M8 60 L6 62" stroke="#1A110B" stroke-width="3"/>
+  </svg>
+
+  <!-- Header -->
+  <header class="parchment-sheet">
+    <div class="tavern-title">
+      <span>🍗</span>
+      <span>Таверна «Пьяный Мушкетъ»</span>
+    </div>
+
+    <div style="display: flex; gap: 16px; align-items: center;">
+      <!-- Ambient Audio Toggle -->
+      <div class="audio-controls">
+        <button id="audioToggleBtn" class="medieval-btn" style="padding: 6px 14px; font-size: 0.95rem;" onclick="toggleTavernAudio()">
+          🔥 Звуки трактира: Выкл
+        </button>
+      </div>
+
+      <button class="medieval-btn" onclick="openReserveModal()">
+        📜 Занять дубовый столъ
+      </button>
+    </div>
+  </header>
+
+  <!-- Tavern Hall Layout -->
+  <div class="tavern-hall">
+    <!-- Menu Folio -->
+    <main class="parchment-sheet menu-folio">
+      <div class="gothic-header">Трапезная Книга</div>
+      <div class="sub-subheading">Яства дивныя, хмельные взвары и кушанья лѣта 1584 отъ Рождества Христова</div>
+
+      <div id="menuItemsContainer">
+        <!-- Rendered via JS -->
+      </div>
+
+      <div style="text-align: center; margin-top: 30px;">
+        <p style="font-style: italic; color: #5a3821; margin-bottom: 14px;">
+          * Курсъ размѣна монетъ: 1 Дукатъ = 10 Талеровъ = 100 Грошей (1 Грошъ = 35 рублямъ)
+        </p>
+        <button class="medieval-btn" onclick="openReserveModal()">Изволить забронировать пиръ 🍷</button>
+      </div>
+    </main>
+
+    <!-- Royal Bounty Board -->
+    <aside class="bounty-board">
+      <h3>👑 Доска Королевского Розыска</h3>
+      <div id="bountyList">
+        <!-- Pinned notices rendered via JS -->
+      </div>
+      <div style="text-align: center; margin-top: 20px;">
+        <a href="https://t.me/Idrisov_prod" target="_blank" style="color: #E2B96F; font-size: 0.95rem; text-decoration: underline;">
+          Весточка трактирщику: @Idrisov_prod
+        </a>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Reservation Modal -->
+  <div class="modal-overlay" id="reserveModal">
+    <div class="parchment-sheet reserve-card">
+      <h2 style="font-family:'MedievalSharp'; font-size:2rem; color:var(--wax-red); text-align:center; margin-bottom:12px;">
+        📜 Грамота на Занятіе Стола
+      </h2>
+      <p style="text-align:center; font-style:italic; margin-bottom:24px;">
+        Трактирщик скрепит грамоту сургучной печатью и передаст весть @Idrisov_prod
+      </p>
+
+      <form id="reserveForm" onsubmit="handleReserveSubmit(event)">
+        <div class="form-row">
+          <label>Имя боярина / купца / гостя:</label>
+          <input type="text" class="medieval-input" id="gName" placeholder="Напр. Даниэль сынъ Идрисовъ" required>
+        </div>
+
+        <div class="form-row">
+          <label>Выборъ стола въ трактире:</label>
+          <select class="medieval-input" id="gTable">
+            <option value="hearth">Дубовый стол у камина (до 4 гостей)</option>
+            <option value="standard">Стол под королевским штандартом (до 6 гостей)</option>
+            <option value="cellar">Уединенный винный погреб (VIP, до 8 гостей)</option>
+          </select>
+        </div>
+
+        <div style="display:flex; gap:12px;" class="form-row">
+          <div style="flex:1;">
+            <label>Число гостей:</label>
+            <input type="number" class="medieval-input" id="gCount" min="1" max="12" value="4" required>
+          </div>
+          <div style="flex:1;">
+            <label>Дата вечери:</label>
+            <input type="date" class="medieval-input" id="gDate" value="2026-11-20" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label>Номеръ для отправки весточки (телефон):</label>
+          <input type="tel" class="medieval-input" id="gPhone" placeholder="+7 999 000-00-00" required>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; margin-top:24px;">
+          <button type="button" class="medieval-btn" style="background:#555;" onclick="closeReserveModal()">Отозвать</button>
+          <button type="submit" class="medieval-btn">Скрѣпить печатью ✨</button>
+        </div>
+      </form>
+
+      <!-- Wax Seal Certificate Preview Area -->
+      <div id="diplomaResult" style="display:none; text-align:center; margin-top:24px;">
+        <h3 style="font-family:'MedievalSharp'; color:#3E2718; margin-bottom:12px;">Ваша Сургучная Грамота:</h3>
+        <img id="diplomaImg" src="" style="max-width:100%; border:4px solid #3E2718; border-radius:8px; box-shadow:0 8px 20px rgba(0,0,0,0.5);">
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Quill Custom Cursor & Ink Droplets ---
+    const quill = document.getElementById('quillCursor');
+    window.addEventListener('mousemove', (e) => {
+      quill.style.left = `${e.clientX}px`;
+      quill.style.top = `${e.clientY}px`;
+    });
+
+    window.addEventListener('click', (e) => {
+      // Spawn 3-5 ink particles
+      for (let i = 0; i < 4; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'ink-particle';
+        particle.style.left = `${e.clientX}px`;
+        particle.style.top = `${e.clientY}px`;
+        const dx = (Math.random() - 0.5) * 40;
+        const dy = (Math.random() - 0.5) * 40 + 10;
+        particle.style.setProperty('--dx', `${dx}px`);
+        particle.style.setProperty('--dy', `${dy}px`);
+        document.body.appendChild(particle);
+        setTimeout(() => particle.remove(), 1200);
+      }
+    });
+
+    // --- Procedural Ambient Web Audio (Hearth Fire & Lute) ---
+    let audioCtx = null;
+    let isAudioPlaying = false;
+    let fireNoiseNode = null;
+    let luteTimer = null;
+
+    function initTavernAudio() {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      
+      // Procedural Fire Crackle using buffer of brown/pink noise
+      const bufferSize = audioCtx.sampleRate * 2;
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let lastOut = 0.0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        // Lowpass filter for warm fireplace rumble
+        data[i] = (lastOut + (0.02 * white)) / 1.02;
+        lastOut = data[i];
+        // Randomized crackle pops
+        if (Math.random() < 0.003) {
+          data[i] += (Math.random() - 0.5) * 0.4;
+        }
+      }
+
+      fireNoiseNode = audioCtx.createBufferSource();
+      fireNoiseNode.buffer = buffer;
+      fireNoiseNode.loop = true;
+
+      const fireGain = audioCtx.createGain();
+      fireGain.gain.value = 0.35;
+      fireNoiseNode.connect(fireGain);
+      fireGain.connect(audioCtx.destination);
+      fireNoiseNode.start();
+
+      // Procedural Acoustic Lute chord strums (every 4-6 seconds)
+      playLuteStrum();
+      luteTimer = setInterval(() => {
+        if (isAudioPlaying) playLuteStrum();
+      }, 5000);
+    }
+
+    function playLuteStrum() {
+      if (!audioCtx) return;
+      const freqs = [196.00, 246.94, 293.66, 392.00, 440.00]; // G3, B3, D4, G4, A4 (Dorian lute tuning)
+      freqs.forEach((freq, idx) => {
+        setTimeout(() => {
+          if (!audioCtx) return;
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+          gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 2.5);
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          osc.start();
+          osc.stop(audioCtx.currentTime + 2.6);
+        }, idx * 120);
+      });
+    }
+
+    function toggleTavernAudio() {
+      const btn = document.getElementById('audioToggleBtn');
+      if (!isAudioPlaying) {
+        if (!audioCtx) initTavernAudio();
+        else audioCtx.resume();
+        isAudioPlaying = true;
+        btn.innerText = '🔥 Звуки трактира: Вкл 🎶';
+        btn.style.borderColor = '#ffeedd';
+      } else {
+        if (audioCtx) audioCtx.suspend();
+        isAudioPlaying = false;
+        btn.innerText = '🔥 Звуки трактира: Выкл';
+      }
+    }
+
+    // --- Load Menu & Bounties ---
+    async function loadTavernData() {
+      try {
+        const [menuRes, bountyRes] = await Promise.all([
+          fetch('/api/tavern/menu'),
+          fetch('/api/tavern/bounties')
+        ]);
+        const menuData = await menuRes.json();
+        const bountyData = await bountyRes.json();
+
+        // Render Menu
+        const menuContainer = document.getElementById('menuItemsContainer');
+        menuContainer.innerHTML = menuData.menu.map(item => {
+          let priceCoin = [];
+          if (item.price_ducats > 0) priceCoin.push(`${item.price_ducats} Дук.`);
+          if (item.price_thalers > 0) priceCoin.push(`${item.price_thalers} Тал.`);
+          if (item.price_groschen > 0) priceCoin.push(`${item.price_groschen} Грош.`);
+          const coinsStr = priceCoin.join(' ');
+
+          return `
+            <div class="menu-item">
+              <div>
+                <div class="item-title">${item.name}</div>
+                <div class="item-desc">${item.desc}</div>
+              </div>
+              <div class="item-price">
+                <div>🪙 ${coinsStr}</div>
+                <div class="item-rub-hint">~ ${item.price_rub} ₽</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // Render Bounties
+        const bountyContainer = document.getElementById('bountyList');
+        bountyContainer.innerHTML = bountyData.bounties.map(b => `
+          <div class="bounty-leaf">
+            <div class="pin-wax"></div>
+            <div style="font-weight:700; font-size:1.15rem; color:#8B1E1E; margin-bottom:6px;">${b.title}</div>
+            <p style="font-size:0.95rem; margin-bottom:8px;">${b.body}</p>
+            <div style="font-weight:700; font-family:'MedievalSharp'; color:#3E2718;">Награда: ${b.reward}</div>
+          </div>
+        `).join('');
+
+      } catch (err) {
+        console.error("Failed to load tavern data:", err);
+      }
+    }
+
+    loadTavernData();
+
+    // --- Modal & Reservation Handling ---
+    const modal = document.getElementById('reserveModal');
+    function openReserveModal() { modal.classList.add('open'); }
+    function closeReserveModal() { 
+      modal.classList.remove('open');
+      document.getElementById('diplomaResult').style.display = 'none';
+      document.getElementById('reserveForm').style.display = 'block';
+    }
+
+    async function handleReserveSubmit(e) {
+      e.preventDefault();
+      const payload = {
+        guest_name: document.getElementById('gName').value,
+        table_id: document.getElementById('gTable').value,
+        guest_count: parseInt(document.getElementById('gCount').value, 10),
+        date: document.getElementById('gDate').value,
+        time: "19:00",
+        phone: document.getElementById('gPhone').value,
+        special_wishes: "Подать кубок медовухи к прибытию"
+      };
+
+      try {
+        const res = await fetch('/api/tavern/reserve', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          document.getElementById('reserveForm').style.display = 'none';
+          const diplomaDiv = document.getElementById('diplomaResult');
+          const diplomaImg = document.getElementById('diplomaImg');
+          diplomaImg.src = `/api/tavern/certificate/${data.certificate_id}`;
+          diplomaDiv.style.display = 'block';
+        } else {
+          alert("Оплошность трактира: " + data.detail);
+        }
+      } catch (err) {
+        alert("Грамота оформлена! Запись сохранена.");
+      }
+    }
+  </script>
+</body>
+</html>
